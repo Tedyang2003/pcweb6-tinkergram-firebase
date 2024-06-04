@@ -1,23 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Container, Image, Nav, Navbar, Row } from "react-bootstrap";
 import { useParams } from "react-router-dom";
+import { doc, getDoc,  deleteDoc} from "firebase/firestore";
+import {db, auth} from "../firebase"
+import {useAuthState} from "react-firebase-hooks/auth"
+import { signOut } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+
+
 
 export default function PostPageDetails() {
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState("");
   const params = useParams();
   const id = params.id;
+  const [user, loading] = useAuthState(auth)
+  const navigate = useNavigate()
 
-  async function deletePost(id) {}
+
+  async function deletePost(id) {
+    await deleteDoc(doc(db, "posts", id))
+    navigate("/")
+  }
 
   async function getPost(id) {
-    setCaption("");
-    setImage("");
+    const query = await getDoc(doc(db, "posts", id), )
+    const post = query.data()
+    setCaption(post.caption);
+    setImage(post.image);
   }
 
   useEffect(() => {
+    if (loading) return
+    if (!user) return navigate("/login")
     getPost(id);
-  }, [id]);
+  }, [id, loading, navigate, user]);
 
   return (
     <>
@@ -26,7 +43,7 @@ export default function PostPageDetails() {
           <Navbar.Brand href="/">Tinkergram</Navbar.Brand>
           <Nav>
             <Nav.Link href="/add">New Post</Nav.Link>
-            <Nav.Link href="/add">🚪</Nav.Link>
+            <Nav.Link onClick = {() => signOut(auth)}>🚪</Nav.Link>
           </Nav>
         </Container>
       </Navbar>
