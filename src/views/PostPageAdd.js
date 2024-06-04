@@ -1,22 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { Button, Container, Form, Nav, Navbar } from "react-bootstrap";
-import {addDoc, collection} from "firebase/firestore"
+import { Button, Container, Form, Nav, Navbar, Image } from "react-bootstrap";
+import {addDoc, collection,} from "firebase/firestore"
 import {useAuthState} from "react-firebase-hooks/auth"
-import {auth, db} from "../firebase"
+import {auth, db, storage} from "../firebase"
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { getDownloadURL, ref, uploadBytes, uploadString } from "firebase/storage";
 
 export default function PostPageAdd() {
   const [caption, setCaption] = useState("");
   const [image, setImage] = useState("");
   const [user, loading] = useAuthState(auth)
   const navigate = useNavigate()
+  const [previewImage, setPreviewImage] = useState("https://ralfvanveen.com/wp-content/uploads/2021/06/Placeholder-_-Glossary.svg")
 
 
   async function addPost() {
+
+    const imageRef = ref(storage, `images/${image.name}`)
+    const response = await uploadBytes(imageRef, image)
+    const imageURL = await getDownloadURL(response.ref)
+
     const post = {
       caption: caption,
-      image: image
+      image: imageURL
     }
 
     try {
@@ -56,14 +63,17 @@ export default function PostPageAdd() {
               onChange={(text) => setCaption(text.target.value)}
             />
           </Form.Group>
-
+          <Image src={previewImage} style = {{objectFit: "cover", width: "10rem", height: "10rem"}}></Image>
           <Form.Group className="mb-3" controlId="image">
-            <Form.Label>Image URL</Form.Label>
+            <Form.Label>Image</Form.Label>
             <Form.Control
-              type="text"
-              placeholder="https://zca.sg/img/1"
-              value={image}
-              onChange={(text) => setImage(text.target.value)}
+              type="file"
+              onChange={(e) => {
+                const imageFile = e.target.files[0]
+                setImage(imageFile)
+                const previewImage = URL.createObjectURL(imageFile)
+                setPreviewImage(previewImage)
+              }}
             />
             <Form.Text className="text-muted">
               Make sure the url has a image type at the end: jpg, jpeg, png.
