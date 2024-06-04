@@ -5,7 +5,7 @@ import {useAuthState} from "react-firebase-hooks/auth"
 import {auth, db, storage} from "../firebase"
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import { getDownloadURL, ref, uploadBytes, uploadString } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export default function PostPageAdd() {
   const [caption, setCaption] = useState("");

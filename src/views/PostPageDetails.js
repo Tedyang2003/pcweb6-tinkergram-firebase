@@ -43,7 +43,7 @@ export default function PostPageDetails() {
     const url = new URL(post.image);
     const pathParts = url.pathname.split('/');
     let refPath = pathParts[pathParts.length - 1]
-    refPath =decodeURIComponent(refPath)
+    refPath = decodeURIComponent(refPath)
 
     setRefPath(refPath)
   }
